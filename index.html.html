@@ -1,0 +1,718 @@
+
+html_code = '''<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ududumbara Secondary School - Attendance System</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+/* Login Screen */
+.login-screen { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+.login-box { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 100%; max-width: 450px; text-align: center; }
+.login-box h1 { color: #667eea; margin-bottom: 10px; font-size: 28px; }
+.login-box h2 { color: #555; margin-bottom: 30px; font-size: 16px; font-weight: normal; }
+.login-box .logo { font-size: 60px; margin-bottom: 20px; }
+.input-group { margin-bottom: 20px; text-align: left; }
+.input-group label { display: block; margin-bottom: 8px; color: #555; font-weight: 600; }
+.input-group input, .input-group select { width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; transition: border-color 0.3s; }
+.input-group input:focus, .input-group select:focus { outline: none; border-color: #667eea; }
+.btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+.btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
+.error-msg { color: #e74c3c; margin-top: 15px; display: none; }
+
+/* Dashboard */
+.dashboard { display: none; background: #f5f7fa; min-height: 100vh; }
+.header { background: white; padding: 15px 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+.header h1 { color: #667eea; font-size: 22px; }
+.header .user-info { display: flex; align-items: center; gap: 15px; }
+.header .user-info span { color: #555; font-weight: 600; }
+.header .badge { background: #667eea; color: white; padding: 5px 15px; border-radius: 20px; font-size: 12px; }
+.logout-btn { background: #e74c3c; color: white; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: 600; transition: background 0.3s; }
+.logout-btn:hover { background: #c0392b; }
+
+.content { padding: 30px; }
+
+/* Stats Cards */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+.stat-card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); transition: transform 0.3s; }
+.stat-card:hover { transform: translateY(-5px); }
+.stat-card .icon { font-size: 40px; margin-bottom: 10px; }
+.stat-card .number { font-size: 36px; font-weight: 700; color: #667eea; }
+.stat-card .label { color: #888; font-size: 14px; margin-top: 5px; }
+.stat-card.green .number { color: #27ae60; }
+.stat-card.red .number { color: #e74c3c; }
+.stat-card.orange .number { color: #f39c12; }
+
+/* Class Cards for Principal */
+.classes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px; }
+.class-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.3s, box-shadow 0.3s; }
+.class-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+.class-card-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; }
+.class-card-header h3 { font-size: 20px; margin-bottom: 5px; }
+.class-card-header p { opacity: 0.9; font-size: 14px; }
+.class-card-body { padding: 20px; }
+.class-card-body .mini-stats { display: flex; justify-content: space-between; margin-bottom: 15px; }
+.mini-stat { text-align: center; }
+.mini-stat .value { font-size: 24px; font-weight: 700; color: #667eea; }
+.mini-stat .label { font-size: 12px; color: #888; }
+.progress-bar { height: 8px; background: #ecf0f1; border-radius: 4px; overflow: hidden; }
+.progress-bar .fill { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 4px; transition: width 0.5s; }
+
+/* Attendance Table */
+.attendance-section { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+.section-header h2 { color: #333; font-size: 22px; }
+.date-picker { display: flex; align-items: center; gap: 10px; }
+.date-picker input { padding: 10px 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; }
+.date-picker button { padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; }
+
+/* Student Table */
+.student-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+.student-table th { background: #f8f9fa; padding: 15px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #e0e0e0; }
+.student-table td { padding: 15px; border-bottom: 1px solid #f0f0f0; }
+.student-table tr:hover { background: #fafbfc; }
+.student-table .student-name { font-weight: 600; color: #333; }
+.student-table .student-id { color: #888; font-size: 13px; }
+
+/* Attendance Toggle */
+.attendance-toggle { display: flex; gap: 10px; }
+.toggle-btn { padding: 8px 20px; border: 2px solid #e0e0e0; background: white; border-radius: 20px; cursor: pointer; font-weight: 600; transition: all 0.3s; font-size: 13px; }
+.toggle-btn.present { border-color: #27ae60; color: #27ae60; }
+.toggle-btn.present.active { background: #27ae60; color: white; }
+.toggle-btn.absent { border-color: #e74c3c; color: #e74c3c; }
+.toggle-btn.absent.active { background: #e74c3c; color: white; }
+.toggle-btn:hover { transform: scale(1.05); }
+
+/* Summary Panel */
+.summary-panel { background: #f8f9fa; border-radius: 10px; padding: 20px; margin-top: 20px; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px; }
+.summary-item { text-align: center; }
+.summary-item .value { font-size: 28px; font-weight: 700; }
+.summary-item .value.present { color: #27ae60; }
+.summary-item .value.absent { color: #e74c3c; }
+.summary-item .value.total { color: #667eea; }
+.summary-item .label { color: #888; font-size: 13px; margin-top: 5px; }
+
+/* Action Buttons */
+.action-btns { display: flex; gap: 15px; margin-top: 25px; justify-content: flex-end; }
+.action-btn { padding: 12px 30px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+.action-btn.save { background: #27ae60; color: white; }
+.action-btn.print { background: #667eea; color: white; }
+.action-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+
+/* Back Button */
+.back-btn { background: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; margin-bottom: 20px; transition: background 0.3s; }
+.back-btn:hover { background: #7f8c8d; }
+
+/* Principal View - All Classes Table */
+.all-classes-table { width: 100%; border-collapse: collapse; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+.all-classes-table th { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; text-align: left; font-weight: 600; }
+.all-classes-table td { padding: 15px; border-bottom: 1px solid #f0f0f0; }
+.all-classes-table tr:hover { background: #fafbfc; }
+.all-classes-table .class-name { font-weight: 600; color: #333; }
+.all-classes-table .teacher-name { color: #667eea; font-weight: 500; }
+.status-badge { padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.status-badge.completed { background: #d4edda; color: #155724; }
+.status-badge.pending { background: #fff3cd; color: #856404; }
+.status-badge.not-marked { background: #f8d7da; color: #721c24; }
+.view-link { color: #667eea; text-decoration: none; font-weight: 600; cursor: pointer; }
+.view-link:hover { text-decoration: underline; }
+
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.fade-in { animation: fadeIn 0.5s ease-out; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stats-grid { grid-template-columns: 1fr; }
+    .classes-grid { grid-template-columns: 1fr; }
+    .section-header { flex-direction: column; align-items: flex-start; }
+    .student-table { font-size: 14px; }
+    .student-table th, .student-table td { padding: 10px; }
+    .attendance-toggle { flex-direction: column; gap: 5px; }
+}
+
+/* Print Styles */
+@media print {
+    .header, .action-btns, .back-btn, .login-screen { display: none !important; }
+    .dashboard { display: block !important; }
+    .attendance-section { box-shadow: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-screen">
+    <div class="login-box fade-in">
+        <div class="logo">🏫</div>
+        <h1>Ududumbara Secondary School</h1>
+        <h2>Student Attendance Management System</h2>
+        <h3 style="color: #667eea; margin-bottom: 25px;">Grades 6 - 13</h3>
+        
+        <div class="input-group">
+            <label>👤 Select User</label>
+            <select id="userSelect">
+                <option value="">-- Select Your Account --</option>
+                <option value="teacher_6A">👨‍🏫 Mrs. Perera - Grade 6A</option>
+                <option value="teacher_6B">👨‍🏫 Mr. Silva - Grade 6B</option>
+                <option value="teacher_6C">👩‍🏫 Mrs. Fernando - Grade 6C</option>
+                <option value="teacher_7A">👨‍🏫 Mr. Jayasinghe - Grade 7A</option>
+                <option value="teacher_7B">👩‍🏫 Mrs. Kumari - Grade 7B</option>
+                <option value="teacher_7C">👨‍🏫 Mr. Bandara - Grade 7C</option>
+                <option value="teacher_8A">👩‍🏫 Mrs. Weerasinghe - Grade 8A</option>
+                <option value="teacher_8B">👨‍🏫 Mr. Rathnayake - Grade 8B</option>
+                <option value="teacher_8C">👩‍🏫 Mrs. Senanayake - Grade 8C</option>
+                <option value="teacher_9A">👨‍🏫 Mr. Gunawardena - Grade 9A</option>
+                <option value="teacher_9B">👩‍🏫 Mrs. Dias - Grade 9B</option>
+                <option value="teacher_9C">👨‍🏫 Mr. Seneviratne - Grade 9C</option>
+                <option value="teacher_10A">👩‍🏫 Mrs. Wijesinghe - Grade 10A</option>
+                <option value="teacher_10B">👨‍🏫 Mr. Karunaratne - Grade 10B</option>
+                <option value="teacher_10C">👩‍🏫 Mrs. Abeysekera - Grade 10C</option>
+                <option value="teacher_11A">👨‍🏫 Mr. Ekanayake - Grade 11A</option>
+                <option value="teacher_11B">👩‍🏫 Mrs. Gamage - Grade 11B</option>
+                <option value="teacher_11C">👨‍🏫 Mr. Hettiarachchi - Grade 11C</option>
+                <option value="teacher_12">👩‍🏫 Mrs. Amarasena - Grade 12 (A/L)</option>
+                <option value="teacher_13">👨‍🏫 Mr. Wickramasinghe - Grade 13 (A/L)</option>
+                <option value="principal">👨‍💼 Principal - Mr. Dissanayake</option>
+            </select>
+        </div>
+        
+        <div class="input-group">
+            <label>🔒 Password</label>
+            <input type="password" id="passwordInput" placeholder="Enter password (use 'password')" value="password">
+        </div>
+        
+        <button class="btn btn-primary" onclick="login()">Sign In</button>
+        <p class="error-msg" id="errorMsg">Invalid credentials. Please try again.</p>
+        
+        <p style="margin-top: 20px; color: #888; font-size: 13px;">
+            💡 Demo Password: <strong>password</strong> (for all accounts)
+        </p>
+    </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="dashboard">
+    <div class="header">
+        <h1>🏫 Ududumbara Secondary School</h1>
+        <div class="user-info">
+            <span id="userName">Teacher</span>
+            <span class="badge" id="userRole">Teacher</span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+    
+    <div class="content" id="contentArea">
+        <!-- Content loaded dynamically -->
+    </div>
+</div>
+
+<script>
+// ===================== DATA =====================
+const classes = {
+    '6A': { teacher: 'Mrs. Perera', students: generateStudents('6A', 35) },
+    '6B': { teacher: 'Mr. Silva', students: generateStudents('6B', 33) },
+    '6C': { teacher: 'Mrs. Fernando', students: generateStudents('6C', 34) },
+    '7A': { teacher: 'Mr. Jayasinghe', students: generateStudents('7A', 32) },
+    '7B': { teacher: 'Mrs. Kumari', students: generateStudents('7B', 35) },
+    '7C': { teacher: 'Mr. Bandara', students: generateStudents('7C', 31) },
+    '8A': { teacher: 'Mrs. Weerasinghe', students: generateStudents('8A', 36) },
+    '8B': { teacher: 'Mr. Rathnayake', students: generateStudents('8B', 34) },
+    '8C': { teacher: 'Mrs. Senanayake', students: generateStudents('8C', 33) },
+    '9A': { teacher: 'Mr. Gunawardena', students: generateStudents('9A', 35) },
+    '9B': { teacher: 'Mrs. Dias', students: generateStudents('9B', 32) },
+    '9C': { teacher: 'Mr. Seneviratne', students: generateStudents('9C', 34) },
+    '10A': { teacher: 'Mrs. Wijesinghe', students: generateStudents('10A', 30) },
+    '10B': { teacher: 'Mr. Karunaratne', students: generateStudents('10B', 31) },
+    '10C': { teacher: 'Mrs. Abeysekera', students: generateStudents('10C', 29) },
+    '11A': { teacher: 'Mr. Ekanayake', students: generateStudents('11A', 28) },
+    '11B': { teacher: 'Mrs. Gamage', students: generateStudents('11B', 30) },
+    '11C': { teacher: 'Mr. Hettiarachchi', students: generateStudents('11C', 27) },
+    '12': { teacher: 'Mrs. Amarasena', students: generateStudents('12', 45) },
+    '13': { teacher: 'Mr. Wickramasinghe', students: generateStudents('13', 42) }
+};
+
+const teacherClasses = {
+    'teacher_6A': ['6A'], 'teacher_6B': ['6B'], 'teacher_6C': ['6C'],
+    'teacher_7A': ['7A'], 'teacher_7B': ['7B'], 'teacher_7C': ['7C'],
+    'teacher_8A': ['8A'], 'teacher_8B': ['8B'], 'teacher_8C': ['8C'],
+    'teacher_9A': ['9A'], 'teacher_9B': ['9B'], 'teacher_9C': ['9C'],
+    'teacher_10A': ['10A'], 'teacher_10B': ['10B'], 'teacher_10C': ['10C'],
+    'teacher_11A': ['11A'], 'teacher_11B': ['11B'], 'teacher_11C': ['11C'],
+    'teacher_12': ['12'], 'teacher_13': ['13'],
+    'principal': Object.keys(classes)
+};
+
+const teacherNames = {
+    'teacher_6A': 'Mrs. Perera', 'teacher_6B': 'Mr. Silva', 'teacher_6C': 'Mrs. Fernando',
+    'teacher_7A': 'Mr. Jayasinghe', 'teacher_7B': 'Mrs. Kumari', 'teacher_7C': 'Mr. Bandara',
+    'teacher_8A': 'Mrs. Weerasinghe', 'teacher_8B': 'Mr. Rathnayake', 'teacher_8C': 'Mrs. Senanayake',
+    'teacher_9A': 'Mr. Gunawardena', 'teacher_9B': 'Mrs. Dias', 'teacher_9C': 'Mr. Seneviratne',
+    'teacher_10A': 'Mrs. Wijesinghe', 'teacher_10B': 'Mr. Karunaratne', 'teacher_10C': 'Mrs. Abeysekera',
+    'teacher_11A': 'Mr. Ekanayake', 'teacher_11B': 'Mrs. Gamage', 'teacher_11C': 'Mr. Hettiarachchi',
+    'teacher_12': 'Mrs. Amarasena', 'teacher_13': 'Mr. Wickramasinghe',
+    'principal': 'Mr. Dissanayake'
+};
+
+// Attendance storage (in-memory for demo)
+let attendanceData = JSON.parse(localStorage.getItem('attendanceData')) || {};
+let currentUser = null;
+let currentUserId = null;
+
+function generateStudents(className, count) {
+    const firstNames = ['Amal', 'Kamal', 'Nimal', 'Sunil', 'Anil', 'Ruwan', 'Saman', 'Chamara', 'Lahiru', 'Dinesh',
+        'Sajith', 'Tharindu', 'Kasun', 'Nuwan', 'Pradeep', 'Indika', 'Sanjeewa', 'Chathura', 'Roshan', 'Sameera',
+        'Nadeesha', 'Chamari', 'Thilini', 'Dilini', 'Harshani', 'Kavindi', 'Sachini', 'Imashi', 'Rashmi', 'Dinithi',
+        'Piumi', 'Tharushi', 'Nethmi', 'Sewmini', 'Hansani', 'Yasith', 'Isuru', 'Dhanuka', 'Buddhika', 'Chamindu',
+        'Gayan', 'Hasitha', 'Janith', 'Kasun', 'Lakmal', 'Mahesh', 'Niroshan', 'Oshada', 'Prabath', 'Ravindu'];
+    const lastNames = ['Perera', 'Silva', 'Fernando', 'Jayasinghe', 'Bandara', 'Weerasinghe', 'Rathnayake', 'Senanayake',
+        'Gunawardena', 'Dias', 'Seneviratne', 'Wijesinghe', 'Karunaratne', 'Abeysekera', 'Ekanayake', 'Gamage',
+        'Hettiarachchi', 'Amarasena', 'Wickramasinghe', 'Dissanayake', 'Kumara', 'Samarasinghe', 'Rajapaksha',
+        'Mendis', 'Herath', 'Pathirana', 'Liyanage', 'Sooriyarachchi', 'Priyadarshana', 'Ranasinghe'];
+    
+    const students = [];
+    for (let i = 1; i <= count; i++) {
+        const fname = firstNames[Math.floor(Math.random() * firstNames.length)];
+        const lname = lastNames[Math.floor(Math.random() * lastNames.length)];
+        students.push({
+            id: `${className.replace(/[^0-9]/g, '')}${String(i).padStart(3, '0')}`,
+            name: `${fname} ${lname}`,
+            gender: i % 2 === 0 ? 'Female' : 'Male'
+        });
+    }
+    return students;
+}
+
+function getTodayDate() {
+    return new Date().toISOString().split('T')[0];
+}
+
+function getAttendance(className, date) {
+    const key = `${className}_${date}`;
+    if (!attendanceData[key]) {
+        attendanceData[key] = {};
+    }
+    return attendanceData[key];
+}
+
+function saveAttendance(className, date, studentId, status) {
+    const key = `${className}_${date}`;
+    if (!attendanceData[key]) attendanceData[key] = {};
+    attendanceData[key][studentId] = status;
+    localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
+}
+
+// ===================== LOGIN =====================
+function login() {
+    const userId = document.getElementById('userSelect').value;
+    const password = document.getElementById('passwordInput').value;
+    
+    if (!userId) {
+        document.getElementById('errorMsg').textContent = 'Please select a user account.';
+        document.getElementById('errorMsg').style.display = 'block';
+        return;
+    }
+    
+    if (password !== 'password') {
+        document.getElementById('errorMsg').textContent = 'Invalid password. Use "password" for demo.';
+        document.getElementById('errorMsg').style.display = 'block';
+        return;
+    }
+    
+    currentUserId = userId;
+    currentUser = teacherNames[userId];
+    
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('userName').textContent = currentUser;
+    document.getElementById('userRole').textContent = userId === 'principal' ? 'Principal' : 'Class Teacher';
+    
+    if (userId === 'principal') {
+        showPrincipalDashboard();
+    } else {
+        showTeacherDashboard();
+    }
+}
+
+function logout() {
+    currentUser = null;
+    currentUserId = null;
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('userSelect').value = '';
+    document.getElementById('passwordInput').value = '';
+    document.getElementById('errorMsg').style.display = 'none';
+}
+
+// ===================== TEACHER DASHBOARD =====================
+function showTeacherDashboard() {
+    const myClasses = teacherClasses[currentUserId];
+    const content = document.getElementById('contentArea');
+    
+    let html = `
+        <div class="stats-grid fade-in">
+            <div class="stat-card">
+                <div class="icon">📚</div>
+                <div class="number">${myClasses.length}</div>
+                <div class="label">My Classes</div>
+            </div>
+            <div class="stat-card green">
+                <div class="icon">👨‍🎓</div>
+                <div class="number">${myClasses.reduce((sum, c) => sum + classes[c].students.length, 0)}</div>
+                <div class="label">Total Students</div>
+            </div>
+            <div class="stat-card orange">
+                <div class="icon">📅</div>
+                <div class="number">${getTodayDate()}</div>
+                <div class="label">Today's Date</div>
+            </div>
+        </div>
+        
+        <h2 style="margin-bottom: 20px; color: #333;">My Classes</h2>
+        <div class="classes-grid">
+    `;
+    
+    myClasses.forEach(className => {
+        const cls = classes[className];
+        const today = getTodayDate();
+        const att = getAttendance(className, today);
+        const present = Object.values(att).filter(a => a === 'present').length;
+        const absent = Object.values(att).filter(a => a === 'absent').length;
+        const total = cls.students.length;
+        const percent = total > 0 ? Math.round((present / total) * 100) : 0;
+        const status = present + absent === total ? 'completed' : (present + absent > 0 ? 'pending' : 'not-marked');
+        
+        html += `
+            <div class="class-card" onclick="showAttendancePage('${className}')">
+                <div class="class-card-header">
+                    <h3>Grade ${className}</h3>
+                    <p>${cls.teacher} • ${total} Students</p>
+                </div>
+                <div class="class-card-body">
+                    <div class="mini-stats">
+                        <div class="mini-stat">
+                            <div class="value" style="color: #27ae60;">${present}</div>
+                            <div class="label">Present</div>
+                        </div>
+                        <div class="mini-stat">
+                            <div class="value" style="color: #e74c3c;">${absent}</div>
+                            <div class="label">Absent</div>
+                        </div>
+                        <div class="mini-stat">
+                            <div class="value">${total - present - absent}</div>
+                            <div class="label">Unmarked</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span style="font-size: 13px; color: #888;">Attendance Rate</span>
+                        <span style="font-weight: 700; color: #667eea;">${percent}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="fill" style="width: ${percent}%"></div>
+                    </div>
+                    <div style="margin-top: 15px; text-align: center;">
+                        <span class="status-badge ${status}">${status === 'completed' ? '✓ Completed' : status === 'pending' ? '⏳ In Progress' : '✗ Not Marked'}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    content.innerHTML = html;
+}
+
+// ===================== ATTENDANCE PAGE =====================
+function showAttendancePage(className) {
+    const content = document.getElementById('contentArea');
+    const cls = classes[className];
+    const today = getTodayDate();
+    
+    let html = `
+        <button class="back-btn" onclick="${currentUserId === 'principal' ? 'showPrincipalDashboard()' : 'showTeacherDashboard()'}">← Back</button>
+        
+        <div class="attendance-section fade-in">
+            <div class="section-header">
+                <div>
+                    <h2>Grade ${className} - Attendance Registry</h2>
+                    <p style="color: #888; margin-top: 5px;">Class Teacher: ${cls.teacher} • ${cls.students.length} Students</p>
+                </div>
+                <div class="date-picker">
+                    <label style="font-weight: 600; color: #555;">Date:</label>
+                    <input type="date" id="attDate" value="${today}" onchange="reloadAttendanceTable('${className}')">
+                    <button onclick="reloadAttendanceTable('${className}')">Load</button>
+                </div>
+            </div>
+            
+            <table class="student-table">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">#</th>
+                        <th style="width: 100px;">Student ID</th>
+                        <th>Student Name</th>
+                        <th style="width: 100px;">Gender</th>
+                        <th style="width: 250px;">Attendance</th>
+                        <th style="width: 120px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="attendanceTableBody">
+    `;
+    
+    html += generateAttendanceRows(className, today);
+    
+    html += `
+                </tbody>
+            </table>
+            
+            <div class="summary-panel" id="summaryPanel">
+                ${generateSummary(className, today)}
+            </div>
+            
+            <div class="action-btns">
+                <button class="action-btn save" onclick="saveAllAttendance('${className}')">💾 Save Attendance</button>
+                <button class="action-btn print" onclick="window.print()">🖨️ Print Report</button>
+            </div>
+        </div>
+    `;
+    
+    content.innerHTML = html;
+}
+
+function generateAttendanceRows(className, date) {
+    const cls = classes[className];
+    const att = getAttendance(className, date);
+    let html = '';
+    
+    cls.students.forEach((student, index) => {
+        const status = att[student.id] || '';
+        html += `
+            <tr>
+                <td>${index + 1}</td>
+                <td><span class="student-id">${student.id}</span></td>
+                <td><span class="student-name">${student.name}</span></td>
+                <td>${student.gender === 'Male' ? '👦' : '👧'} ${student.gender}</td>
+                <td>
+                    <div class="attendance-toggle">
+                        <button class="toggle-btn present ${status === 'present' ? 'active' : ''}" 
+                            onclick="toggleAttendance('${className}', '${student.id}', 'present')">✓ Present</button>
+                        <button class="toggle-btn absent ${status === 'absent' ? 'active' : ''}" 
+                            onclick="toggleAttendance('${className}', '${student.id}', 'absent')">✗ Absent</button>
+                    </div>
+                </td>
+                <td>
+                    <span id="status-${student.id}" style="font-weight: 600; color: ${status === 'present' ? '#27ae60' : status === 'absent' ? '#e74c3c' : '#888'};">
+                        ${status === 'present' ? '✓ Present' : status === 'absent' ? '✗ Absent' : '—'}
+                    </span>
+                </td>
+            </tr>
+        `;
+    });
+    
+    return html;
+}
+
+function toggleAttendance(className, studentId, status) {
+    const date = document.getElementById('attDate').value;
+    saveAttendance(className, date, studentId, status);
+    
+    // Update UI
+    const row = document.querySelector(`button[onclick*="'${studentId}'"]`).closest('tr');
+    const buttons = row.querySelectorAll('.toggle-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    
+    if (status === 'present') {
+        row.querySelector('.toggle-btn.present').classList.add('active');
+        document.getElementById(`status-${studentId}`).textContent = '✓ Present';
+        document.getElementById(`status-${studentId}`).style.color = '#27ae60';
+    } else {
+        row.querySelector('.toggle-btn.absent').classList.add('active');
+        document.getElementById(`status-${studentId}`).textContent = '✗ Absent';
+        document.getElementById(`status-${studentId}`).style.color = '#e74c3c';
+    }
+    
+    // Update summary
+    document.getElementById('summaryPanel').innerHTML = generateSummary(className, date);
+}
+
+function generateSummary(className, date) {
+    const cls = classes[className];
+    const att = getAttendance(className, date);
+    const present = Object.values(att).filter(a => a === 'present').length;
+    const absent = Object.values(att).filter(a => a === 'absent').length;
+    const total = cls.students.length;
+    const unmarked = total - present - absent;
+    
+    return `
+        <div class="summary-item">
+            <div class="value total">${total}</div>
+            <div class="label">Total Students</div>
+        </div>
+        <div class="summary-item">
+            <div class="value present">${present}</div>
+            <div class="label">Present</div>
+        </div>
+        <div class="summary-item">
+            <div class="value absent">${absent}</div>
+            <div class="label">Absent</div>
+        </div>
+        <div class="summary-item">
+            <div class="value" style="color: #f39c12;">${unmarked}</div>
+            <div class="label">Unmarked</div>
+        </div>
+        <div class="summary-item">
+            <div class="value" style="color: #667eea;">${total > 0 ? Math.round((present / total) * 100) : 0}%</div>
+            <div class="label">Attendance Rate</div>
+        </div>
+    `;
+}
+
+function reloadAttendanceTable(className) {
+    const date = document.getElementById('attDate').value;
+    document.getElementById('attendanceTableBody').innerHTML = generateAttendanceRows(className, date);
+    document.getElementById('summaryPanel').innerHTML = generateSummary(className, date);
+}
+
+function saveAllAttendance(className) {
+    alert(`✅ Attendance for Grade ${className} saved successfully!\n\nData stored in browser local storage.`);
+}
+
+// ===================== PRINCIPAL DASHBOARD =====================
+function showPrincipalDashboard() {
+    const content = document.getElementById('contentArea');
+    const allClasses = Object.keys(classes);
+    const today = getTodayDate();
+    
+    let totalStudents = 0;
+    let totalPresent = 0;
+    let totalAbsent = 0;
+    let completedClasses = 0;
+    
+    allClasses.forEach(c => {
+        const cls = classes[c];
+        totalStudents += cls.students.length;
+        const att = getAttendance(c, today);
+        const present = Object.values(att).filter(a => a === 'present').length;
+        const absent = Object.values(att).filter(a => a === 'absent').length;
+        totalPresent += present;
+        totalAbsent += absent;
+        if (present + absent === cls.students.length && cls.students.length > 0) completedClasses++;
+    });
+    
+    let html = `
+        <div class="stats-grid fade-in">
+            <div class="stat-card">
+                <div class="icon">🏫</div>
+                <div class="number">${allClasses.length}</div>
+                <div class="label">Total Classes</div>
+            </div>
+            <div class="stat-card green">
+                <div class="icon">👨‍🎓</div>
+                <div class="number">${totalStudents}</div>
+                <div class="label">Total Students</div>
+            </div>
+            <div class="stat-card green">
+                <div class="icon">✅</div>
+                <div class="number">${totalPresent}</div>
+                <div class="label">Present Today</div>
+            </div>
+            <div class="stat-card red">
+                <div class="icon">❌</div>
+                <div class="number">${totalAbsent}</div>
+                <div class="label">Absent Today</div>
+            </div>
+            <div class="stat-card orange">
+                <div class="icon">📊</div>
+                <div class="number">${totalStudents > 0 ? Math.round((totalPresent / totalStudents) * 100) : 0}%</div>
+                <div class="label">School Attendance Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">📝</div>
+                <div class="number">${completedClasses}/${allClasses.length}</div>
+                <div class="label">Classes Completed</div>
+            </div>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="color: #333;">All Classes Overview</h2>
+            <div class="date-picker">
+                <label style="font-weight: 600; color: #555;">Date:</label>
+                <input type="date" id="principalDate" value="${today}" onchange="showPrincipalDashboard()">
+            </div>
+        </div>
+        
+        <div style="overflow-x: auto;">
+            <table class="all-classes-table">
+                <thead>
+                    <tr>
+                        <th>Grade</th>
+                        <th>Class Teacher</th>
+                        <th>Students</th>
+                        <th>Present</th>
+                        <th>Absent</th>
+                        <th>Rate</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    allClasses.forEach(className => {
+        const cls = classes[className];
+        const date = document.getElementById('principalDate')?.value || today;
+        const att = getAttendance(className, date);
+        const present = Object.values(att).filter(a => a === 'present').length;
+        const absent = Object.values(att).filter(a => a === 'absent').length;
+        const total = cls.students.length;
+        const rate = total > 0 ? Math.round((present / total) * 100) : 0;
+        const status = present + absent === total && total > 0 ? 'completed' : (present + absent > 0 ? 'pending' : 'not-marked');
+        
+        html += `
+            <tr>
+                <td><span class="class-name">Grade ${className}</span></td>
+                <td><span class="teacher-name">${cls.teacher}</span></td>
+                <td>${total}</td>
+                <td style="color: #27ae60; font-weight: 600;">${present}</td>
+                <td style="color: #e74c3c; font-weight: 600;">${absent}</td>
+                <td><strong>${rate}%</strong></td>
+                <td><span class="status-badge ${status}">${status === 'completed' ? '✓ Completed' : status === 'pending' ? '⏳ In Progress' : '✗ Not Marked'}</span></td>
+                <td><a class="view-link" onclick="showAttendancePage('${className}')">View Details →</a></td>
+            </tr>
+        `;
+    });
+    
+    html += `
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="action-btns" style="margin-top: 30px;">
+            <button class="action-btn print" onclick="window.print()">🖨️ Print School Report</button>
+        </div>
+    `;
+    
+    content.innerHTML = html;
+}
+
+// Handle Enter key on login
+ document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+     if (e.key === 'Enter') login();
+ });
+</script>
+
+</body>
+</html>
+'''
+
+# Save to file
+with open('/mnt/agents/output/ududumbara_attendance_system.html', 'w', encoding='utf-8') as f:
+    f.write(html_code)
+
+print("✅ File saved successfully!")
+print(f"📄 Size: {len(html_code):,} characters")
+print(f"📊 Lines: {html_code.count(chr(10)):,}")
